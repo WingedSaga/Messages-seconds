@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { supabase } = require('../db/supabase');
 const { USER_FIELDS } = require('../middleware/authMiddleware');
+const messengerSettings = require('../services/messengerSettings');
 
 const SALT_ROUNDS = 10;
 
@@ -79,6 +80,10 @@ async function login(req, res, next) {
     }
     if (user.is_banned) {
       return res.status(403).json({ message: 'Ваш аккаунт заблокирован' });
+    }
+
+    if (user.role !== 'admin' && !(await messengerSettings.isLoginOpen())) {
+      return res.status(403).json({ message: 'Вход в мессенджер временно доступен только администраторам' });
     }
 
     res.json({ token: signToken(user), user: publicUser(user) });
