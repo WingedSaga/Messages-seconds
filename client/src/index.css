@@ -1,0 +1,96 @@
+@import './fonts/fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Мессенджер занимает ровно экран: прокручивается список чатов и лента
+     сообщений, а не страница целиком — иначе на телефоне поле ввода уезжает
+     под адресную строку. */
+  html,
+  body,
+  #root {
+    @apply h-full max-w-full overflow-x-hidden;
+  }
+
+  body {
+    @apply bg-paper text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-white shadow-sm shadow-brand/25 hover:bg-brand-hover hover:shadow-md;
+  }
+
+  .btn-outline {
+    @apply btn border border-brand text-brand-dark hover:bg-brand hover:text-white;
+  }
+
+  .btn-ghost {
+    @apply btn text-muted hover:bg-brand-soft hover:text-brand-dark;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm transition-colors
+      placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgba(23,48,31,0.05)];
+  }
+
+  /* Круглая кнопка в шапке разговора и в поле ввода. */
+  .icon-btn {
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-full text-brand-dark transition-colors
+      hover:bg-brand-soft active:scale-95 disabled:opacity-50;
+  }
+}
+
+/* Ленты прокручиваются часто — тонкая полоса в цвет темы вместо системной. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #bcdcc0 transparent;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #bcdcc0;
+  border-radius: 999px;
+}
+
+/* Фон ленты сообщений: чуть заметная зелёная сетка, чтобы пузыри не висели
+   на пустом белом листе. Рисуется градиентами, картинка не грузится. */
+.chat-canvas {
+  background-color: #f3faf3;
+  background-image: radial-gradient(circle at 1px 1px, rgba(67, 160, 71, 0.09) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Длинная ссылка или слово без пробелов не должны растягивать пузырь. */
+.bubble-text {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

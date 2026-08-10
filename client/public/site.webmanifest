@@ -1,0 +1,10 @@
+{
+  "name": "СООБЩЕНИЯ СЕКУНДЫ",
+  "short_name": "Сообщения",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#F3FAF3",
+  "theme_color": "#43A047",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
