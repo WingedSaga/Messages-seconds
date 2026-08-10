@@ -9,11 +9,11 @@ export default function BrandMark({ compact = false }) {
         <MessageSquare className="h-5 w-5" aria-hidden="true" />
       </span>
       {!compact && (
-        <span className="font-serif leading-tight">
-          <span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+        <span className="leading-tight">
+          <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
             Сообщения
           </span>
-          <span className="block text-lg font-bold tracking-tight text-brand-dark">СЕКУНДЫ</span>
+          <span className="block text-[17px] font-bold tracking-tight text-brand-dark">СЕКУНДЫ</span>
         </span>
       )}
     </span>

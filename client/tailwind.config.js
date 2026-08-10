@@ -24,10 +24,9 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        // Название набирается антиквой — так же, как на сайте.
-        // Имя в кавычках: без них цифра в «Source Serif 4» делает запись
-        // невалидной и браузер молча выбрасывает шрифт.
-        serif: ['"Source Serif 4"', 'Georgia', 'PT Serif', 'serif'],
+        // В мессенджере весь интерфейс набран одним нейтральным шрифтом:
+        // так компактнее выглядит и легче читается на телефоне.
+        serif: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       keyframes: {
         'fade-in': {

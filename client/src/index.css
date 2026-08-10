@@ -16,6 +16,7 @@
 
   body {
     @apply bg-paper text-ink antialiased;
+    font-synthesis: none;
   }
 
   :focus-visible {
@@ -79,6 +80,17 @@
   background-color: #f3faf3;
   background-image: radial-gradient(circle at 1px 1px, rgba(67, 160, 71, 0.09) 1px, transparent 0);
   background-size: 22px 22px;
+}
+
+/* Картинка пользователя никогда не может растянуть карточку или шапку,
+   даже если в профиле был загружен очень большой файл. */
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
 }
 
 /* Длинная ссылка или слово без пробелов не должны растягивать пузырь. */

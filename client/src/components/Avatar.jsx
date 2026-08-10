@@ -14,19 +14,22 @@ export default function Avatar({ name, src, size = 'md', online = false, group =
   const showImage = src && !broken;
 
   return (
-    <span className={`relative shrink-0 ${SIZES[size]}`}>
+    <span
+      className={`avatar relative shrink-0 overflow-hidden border border-brand-accent/70 bg-brand-soft shadow-sm ${SIZES[size]} ${
+        group ? 'rounded-2xl' : 'rounded-full'
+      }`}
+    >
       {showImage ? (
         <img
           src={src}
           alt=""
           loading="lazy"
           onError={() => setBroken(true)}
-          className={`h-full w-full object-cover ${group ? 'rounded-2xl' : 'rounded-full'}`}
+          className="block h-full max-h-full w-full max-w-full object-cover"
         />
       ) : (
         <span
-          className={`grid h-full w-full place-items-center bg-brand-accent font-semibold
-            text-brand-dark ${group ? 'rounded-2xl' : 'rounded-full'}`}
+          className="grid h-full w-full place-items-center bg-gradient-to-br from-brand-accent to-brand-soft font-semibold text-brand-dark"
         >
           {initialOf(name)}
         </span>
