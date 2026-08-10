@@ -15,7 +15,7 @@ export default function Avatar({ name, src, size = 'md', online = false, group =
 
   return (
     <span
-      className={`avatar relative shrink-0 overflow-hidden border border-brand-accent/70 bg-brand-soft shadow-sm ${SIZES[size]} ${
+      className={`avatar inline-grid relative shrink-0 overflow-hidden border border-brand-accent/70 bg-brand-soft shadow-sm ${SIZES[size]} ${
         group ? 'rounded-2xl' : 'rounded-full'
       }`}
     >

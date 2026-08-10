@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MessageSquare, Newspaper, Settings } from 'lucide-react';
+import { MessageSquare, Newspaper, Settings, ShieldCheck } from 'lucide-react';
 
 import api from '../api/axios';
 import Avatar from '../components/Avatar';
@@ -93,6 +93,11 @@ export default function Messenger() {
             >
               <Settings className="h-5 w-5" aria-hidden="true" />
             </button>
+            {user.role === 'admin' && (
+              <button type="button" onClick={() => navigate('/admin')} className="icon-btn" title="Админ-панель">
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              </button>
+            )}
             <button type="button" onClick={() => navigate('/profile')} title={user.username}>
               <Avatar name={user.username} src={user.avatar_url} size="sm" />
             </button>
