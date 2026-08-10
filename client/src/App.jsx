@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Messenger from './pages/Messenger';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
 function Guard({ children }) {
@@ -21,6 +22,14 @@ function GuestOnly({ children }) {
 
   if (loading) return <Loader full label="Проверяем вход" />;
   if (user) return <Navigate to="/" replace />;
+  return children;
+}
+
+function AdminOnly({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader full label="Проверяем доступ" />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/" replace />;
   return children;
 }
 
@@ -70,6 +79,7 @@ export default function App() {
           </Guard>
         }
       />
+      <Route path="/admin" element={<AdminOnly><Admin /></AdminOnly>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
