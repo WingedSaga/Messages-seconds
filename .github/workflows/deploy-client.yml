@@ -40,7 +40,9 @@ jobs:
           # Адрес API мессенджера. Задаётся в Settings -> Secrets and variables
           # -> Actions -> Variables. Запасное значение ведёт на локальный сервер
           # и на боевой сборке работать не будет — переменную надо задать.
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'http://localhost:4100/api' }}
+          # Временный публичный HTTPS-адрес Raspberry Pi. Переменная GitHub
+          # VITE_API_URL по-прежнему может переопределить его без изменения кода.
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://precisely-confident-imaging-department.trycloudflare.com/api' }}
           # Сайт живёт в подпапке /<имя-репозитория>/. Своего домена у
           # мессенджера пока нет: он появится, когда его поставят на
           # news-seconds.duckdns.org.
