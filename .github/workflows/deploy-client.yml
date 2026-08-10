@@ -43,10 +43,9 @@ jobs:
           # Временный публичный HTTPS-адрес Raspberry Pi. Переменная GitHub
           # VITE_API_URL по-прежнему может переопределить его без изменения кода.
           VITE_API_URL: ${{ vars.VITE_API_URL || 'https://precisely-confident-imaging-department.trycloudflare.com/api' }}
-          # Сайт живёт в подпапке /<имя-репозитория>/. Своего домена у
-          # мессенджера пока нет: он появится, когда его поставят на
-          # news-seconds.duckdns.org.
-          VITE_BASE_PATH: /Messages-seconds/
+          # Сайт опубликован на собственном домене и живёт в его корне.
+          # Поэтому ресурсы должны загружаться из /, а не из подпапки репозитория.
+          VITE_BASE_PATH: /
           VITE_SITE_URL: https://news-seconds.duckdns.org
         run: npm run build
 
