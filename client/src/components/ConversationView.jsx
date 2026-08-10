@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ChevronUp, Info, Loader2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, ChevronUp, Info, Loader2, MessageSquare, Share2 } from 'lucide-react';
 
 import Avatar from './Avatar';
 import Composer from './Composer';
@@ -59,6 +59,7 @@ export default function ConversationView({ conversation, meId, onBack, onOpenInf
   const [replyTo, setReplyTo] = useState(null);
   const [editing, setEditing] = useState(null);
   const [lightbox, setLightbox] = useState(null);
+  const [shareHint, setShareHint] = useState('');
 
   const scroller = useRef(null);
   const stick = useRef(true);
@@ -88,6 +89,19 @@ export default function ConversationView({ conversation, meId, onBack, onOpenInf
     const node = scroller.current;
     if (!node) return;
     stick.current = node.scrollHeight - node.scrollTop - node.clientHeight < STICK_TO_BOTTOM_PX;
+  };
+
+  const shareConversation = async () => {
+    const url = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, '')}/chat/${conversation.id}`;
+    const payload = { title: conversation.title, text: `Чат «${conversation.title}»`, url };
+    try {
+      if (navigator.share) await navigator.share(payload);
+      else await navigator.clipboard.writeText(url);
+      setShareHint('Ссылка готова');
+      window.setTimeout(() => setShareHint(''), 1800);
+    } catch (err) {
+      if (err.name !== 'AbortError') setShareHint('Не удалось скопировать');
+    }
   };
 
   // Вниз прокручиваем только когда человек и так внизу: иначе чтение старой
@@ -169,6 +183,9 @@ export default function ConversationView({ conversation, meId, onBack, onOpenInf
 
         <button type="button" onClick={onOpenInfo} className="icon-btn" aria-label="Сведения о разговоре">
           <Info className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <button type="button" onClick={shareConversation} className="icon-btn" title={shareHint || 'Поделиться чатом'} aria-label="Поделиться чатом">
+          <Share2 className="h-5 w-5" aria-hidden="true" />
         </button>
       </header>
 
