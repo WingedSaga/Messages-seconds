@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Ban, Loader2, ShieldCheck, Users } from 'lucide-react';
+import { ArrowLeft, Ban, Loader2, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import Avatar from '../components/Avatar';
@@ -46,6 +46,18 @@ export default function Admin() {
     }
   };
 
+  const toggleLogin = async () => {
+    setBusyId('login');
+    try {
+      const { data: result } = await api.patch('/admin/settings/login', { login_open: !data.settings.login_open });
+      setData((current) => ({ ...current, settings: result.settings }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusyId('');
+    }
+  };
+
   return (
     <main className="mx-auto h-full max-w-3xl overflow-y-auto bg-paper px-4 py-6 sm:px-6">
       <div className="mb-6 flex items-center justify-between gap-3">
@@ -72,6 +84,21 @@ export default function Admin() {
                 <p className="mt-1 text-xs font-medium text-muted">{label}</p>
               </div>
             ))}
+          </section>
+
+          <section className="card mt-5 flex items-center gap-3 p-4">
+            <span className={`grid h-10 w-10 place-items-center rounded-xl ${data.settings.login_open ? 'bg-brand-soft text-brand' : 'bg-amber-50 text-amber-700'}`}>
+              <LockKeyhole className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold text-ink">Вход для пользователей</span>
+              <span className="block text-xs text-muted">
+                {data.settings.login_open ? 'Обычные пользователи могут войти.' : 'Вход закрыт: доступ остаётся у администраторов.'}
+              </span>
+            </span>
+            <button type="button" onClick={toggleLogin} disabled={busyId === 'login'} className={data.settings.login_open ? 'btn-outline px-3 py-2 text-xs' : 'btn-primary px-3 py-2 text-xs'}>
+              {busyId === 'login' ? <Loader2 className="h-4 w-4 animate-spin" /> : data.settings.login_open ? 'Закрыть' : 'Открыть'}
+            </button>
           </section>
 
           <section className="card mt-5 overflow-hidden">

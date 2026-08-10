@@ -2,18 +2,20 @@ const express = require('express');
 const { body, param } = require('express-validator');
 const { supabase } = require('../db/supabase');
 const { validate } = require('../middleware/validate');
+const messengerSettings = require('../services/messengerSettings');
 
 const router = express.Router();
 const USER_FIELDS = 'id, username, email, role, avatar_url, is_banned, created_at';
 
 router.get('/overview', async (_req, res, next) => {
   try {
-    const [users, banned, conversations, messages, recent] = await Promise.all([
+    const [users, banned, conversations, messages, recent, loginOpen] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
       supabase.from('users').select('id', { count: 'exact', head: true }).eq('is_banned', true),
       supabase.from('conversations').select('id', { count: 'exact', head: true }),
       supabase.from('messages').select('id', { count: 'exact', head: true }),
       supabase.from('users').select(USER_FIELDS).order('created_at', { ascending: false }).limit(50),
+      messengerSettings.isLoginOpen(),
     ]);
 
     const errors = [users, banned, conversations, messages, recent].map((item) => item.error).filter(Boolean);
@@ -27,6 +29,7 @@ router.get('/overview', async (_req, res, next) => {
         messages: messages.count || 0,
       },
       users: recent.data || [],
+      settings: { login_open: loginOpen },
     });
   } catch (err) {
     return next(err);
@@ -50,6 +53,20 @@ router.patch(
         .single();
       if (error) throw error;
       return res.json({ user: data });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.patch(
+  '/settings/login',
+  [body('login_open').isBoolean().toBoolean()],
+  validate,
+  async (req, res, next) => {
+    try {
+      const login_open = await messengerSettings.setLoginOpen(req.body.login_open);
+      return res.json({ settings: { login_open } });
     } catch (err) {
       return next(err);
     }
