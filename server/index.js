@@ -19,6 +19,7 @@ const builtInAllowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'https://news-seconds.duckdns.org',
+  'https://messages-seconds.duckdns.org',
   'https://wingedsaga.github.io',
 ];
 
