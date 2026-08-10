@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { supabase, STORAGE_BUCKET } = require('../db/supabase');
+const { supabase, STORAGE_BUCKET, ensureStorageBucket } = require('../db/supabase');
 
 // Предел одного файла в хранилище: на бесплатном тарифе Supabase это 50 МБ.
 const MAX_BYTES = Number(process.env.SUPABASE_CHAT_MAX_BYTES) || 25 * 1024 * 1024;
@@ -29,6 +29,7 @@ function extensionOf(name) {
 // POST /api/upload — вложение к сообщению.
 async function uploadAttachment(req, res, next) {
   try {
+    await ensureStorageBucket();
     if (!req.file) return res.status(400).json({ message: 'Файл не передан' });
 
     const isImage = Boolean(IMAGE_EXTENSIONS[req.file.mimetype]);

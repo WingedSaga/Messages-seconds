@@ -64,6 +64,9 @@ if (require.main === module) {
     // Отставшая база — самая частая причина ошибок 500. Проверяем на старте,
     // чтобы это было видно в логе, а не по жалобе на белый экран.
     require('./db/checkSchema').checkSchema();
+    require('./db/supabase').ensureStorageBucket().catch((error) => {
+      console.error('[storage] bucket preparation failed:', error.message);
+    });
   });
 }
 
