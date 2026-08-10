@@ -25,17 +25,28 @@ const builtInAllowedOrigins = [
 
 const allowedOrigins = [...builtInAllowedOrigins, ...(process.env.CORS_ORIGIN || '').split(',')]
   .map((origin) => origin.trim())
-  .filter(Boolean);
+  .filter((origin) => origin && origin !== '*');
+
+app.use((req, res, next) => {
+  if (allowedOrigins.includes(req.get('Origin'))) {
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
+  }
+  next();
+});
 
 app.use(
   cors({
     origin(origin, callback) {
       // Запросы без Origin (curl, health-check) пропускаем.
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error('Источник запроса не разрешён политикой CORS'));
     },
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    optionsSuccessStatus: 204,
+    maxAge: 86400,
   })
 );
 

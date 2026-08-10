@@ -34,6 +34,9 @@ api.interceptors.response.use(
 
       error.message = data?.message || 'Не удалось выполнить запрос';
       error.fieldErrors = data?.errors || [];
+    } else if (error.code === 'ERR_NETWORK' || error.code === 'ERR_FAILED') {
+      error.isNetworkOrCorsError = true;
+      error.message = 'Не удалось подключиться к серверу сообщений. Проверьте интернет и обновите страницу: Safari мог заблокировать запрос авторизации.';
     } else if (error.code === 'ECONNABORTED') {
       error.message = 'Сервер не ответил вовремя';
     } else {
