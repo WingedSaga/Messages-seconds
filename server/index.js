@@ -60,6 +60,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', authMiddleware, require('./routes/users'));
 app.use('/api/conversations', authMiddleware, require('./routes/conversations'));
 app.use('/api/messages', authMiddleware, require('./routes/messages'));
+app.use('/api/calls', authMiddleware, require('./routes/calls'));
 app.use('/api/upload', authMiddleware, require('./routes/upload'));
 app.use('/api/admin', authMiddleware, require('./middleware/adminMiddleware').adminMiddleware, require('./routes/admin'));
 

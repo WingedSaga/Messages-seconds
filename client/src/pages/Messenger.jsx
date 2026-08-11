@@ -7,6 +7,7 @@ import Avatar from '../components/Avatar';
 import BrandMark from '../components/BrandMark';
 import ChatList from '../components/ChatList';
 import ConversationInfo from '../components/ConversationInfo';
+import CallOverlay from '../components/CallOverlay';
 import ConversationView from '../components/ConversationView';
 import NewChatDialog from '../components/NewChatDialog';
 import NewGroupDialog from '../components/NewGroupDialog';
@@ -25,6 +26,8 @@ export default function Messenger() {
     useConversations();
 
   const [dialog, setDialog] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [activeCall, setActiveCall] = useState(null);
   const readSent = useRef(new Map());
   const previousUnread = useRef(0);
   const [notificationPermission, setNotificationPermission] = useState(() =>
@@ -68,6 +71,45 @@ export default function Messenger() {
   );
 
   const total = conversations.reduce((sum, item) => sum + item.unread, 0);
+
+  useEffect(() => {
+    if (activeCall || incomingCall) return undefined;
+    let cancelled = false;
+    const checkIncoming = async () => {
+      try {
+        const { data } = await api.get('/calls/incoming');
+        if (!cancelled && data.calls?.[0]) setIncomingCall(data.calls[0]);
+      } catch {
+        // Звонок не должен превращать обычный чат в экран ошибки, повторим на следующем опросе.
+      }
+    };
+    checkIncoming();
+    const timer = window.setInterval(checkIncoming, 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [activeCall, incomingCall]);
+
+  const startCall = async (conversation, type) => {
+    const { data } = await api.post('/calls', { conversation_id: conversation.id, type });
+    setActiveCall({ ...data.call, role: 'caller', peerName: conversation.title });
+  };
+
+  const acceptCall = async () => {
+    const { data } = await api.post(`/calls/${incomingCall.id}/accept`);
+    const conversation = conversations.find((item) => item.id === data.call.conversation_id);
+    setIncomingCall(null);
+    setActiveCall({ ...data.call, role: 'callee', peerName: conversation?.title || 'Собеседник' });
+  };
+
+  const rejectCall = async () => {
+    try {
+      await api.post(`/calls/${incomingCall.id}/reject`);
+    } finally {
+      setIncomingCall(null);
+    }
+  };
 
   const requestNotifications = async () => {
     if (typeof Notification === 'undefined') return;
@@ -175,6 +217,7 @@ export default function Messenger() {
             onBack={() => navigate('/')}
             onOpenInfo={() => setDialog('info')}
             onRead={markRead}
+            onStartCall={startCall}
           />
         ) : (
           <div className="h-full bg-paper">
@@ -221,6 +264,21 @@ export default function Messenger() {
           }}
         />
       )}
+
+      {incomingCall && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/70 p-4" role="dialog" aria-modal="true" aria-label="Входящий звонок">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <p className="text-sm text-muted">Входящий {incomingCall.type === 'video' ? 'видеозвонок' : 'аудиозвонок'}</p>
+            <p className="mt-2 text-xl font-bold text-ink">{conversations.find((item) => item.id === incomingCall.conversation_id)?.title || 'Собеседник'}</p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button type="button" onClick={rejectCall} className="btn-danger">Отклонить</button>
+              <button type="button" onClick={acceptCall} className="btn-primary">Принять</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeCall && <CallOverlay call={activeCall} peerName={activeCall.peerName} onEnded={() => setActiveCall(null)} />}
     </div>
   );
 }

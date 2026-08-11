@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ChevronUp, Info, Loader2, MessageSquare, Share2 } from 'lucide-react';
+import { ArrowLeft, ChevronUp, Info, Loader2, MessageSquare, Phone, Share2, Video } from 'lucide-react';
 
 import Avatar from './Avatar';
 import Composer from './Composer';
@@ -40,7 +40,7 @@ function TypingLine({ names }) {
   );
 }
 
-export default function ConversationView({ conversation, meId, onBack, onOpenInfo, onRead }) {
+export default function ConversationView({ conversation, meId, onBack, onOpenInfo, onRead, onStartCall }) {
   const {
     messages,
     loading,
@@ -184,6 +184,16 @@ export default function ConversationView({ conversation, meId, onBack, onOpenInf
         <button type="button" onClick={onOpenInfo} className="icon-btn" aria-label="Сведения о разговоре">
           <Info className="h-5 w-5" aria-hidden="true" />
         </button>
+        {conversation.kind === 'direct' && (
+          <>
+            <button type="button" onClick={() => onStartCall(conversation, 'audio').catch(() => {})} className="icon-btn" aria-label="Аудиозвонок" title="Аудиозвонок">
+              <Phone className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button type="button" onClick={() => onStartCall(conversation, 'video').catch(() => {})} className="icon-btn" aria-label="Видеозвонок" title="Видеозвонок">
+              <Video className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </>
+        )}
         <button type="button" onClick={shareConversation} className="icon-btn" title={shareHint || 'Поделиться чатом'} aria-label="Поделиться чатом">
           <Share2 className="h-5 w-5" aria-hidden="true" />
         </button>
