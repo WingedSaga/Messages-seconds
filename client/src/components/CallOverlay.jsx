@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, PhoneOff, ScreenShare, ScreenShareOff, ShieldCheck, Video, VideoOff } from 'lucide-react';
+import { Mic, MicOff, PhoneOff, ScreenShare, ScreenShareOff, ShieldCheck, Video, VideoOff, Volume2, VolumeX } from 'lucide-react';
 import api from '../api/axios';
 
 const ICE_SERVERS = [
@@ -20,6 +20,7 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [speakerOn, setSpeakerOn] = useState(false);
   const [status, setStatus] = useState(call.role === 'caller' ? 'Вызываем…' : 'Соединяем…');
 
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
@@ -158,6 +159,12 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
   const end = async () => { try { await api.post(`/calls/${call.id}/end`); } catch {} onEnded(); };
   const toggleMute = () => { const next = !muted; stream.current?.getAudioTracks().forEach((track) => { track.enabled = !next; }); setMuted(next); };
   const toggleCamera = () => { const next = !cameraOff; stream.current?.getVideoTracks().forEach((track) => { track.enabled = !next; }); setCameraOff(next); };
+  const nativeAudio = typeof window !== 'undefined' && window.AndroidAudio;
+  const toggleSpeaker = () => {
+    const next = !speakerOn;
+    nativeAudio?.setSpeakerEnabled(next);
+    setSpeakerOn(next);
+  };
   const video = call.type === 'video';
 
   return <div className="fixed inset-0 z-50 bg-[#111317]/95 p-3 text-white sm:grid sm:place-items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Звонок">
@@ -173,6 +180,7 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
       </main>
       <footer className="flex shrink-0 items-center justify-center gap-3 bg-[#202225] p-4 sm:gap-4">
         <button type="button" onClick={toggleMute} className={`grid h-12 w-12 place-items-center rounded-full transition ${muted ? 'bg-[#ed4245] text-white' : 'bg-[#36393f] hover:bg-[#4f545c]'}`} aria-label="Микрофон">{muted ? <MicOff /> : <Mic />}</button>
+        {nativeAudio && <button type="button" onClick={toggleSpeaker} className={`grid h-12 w-12 place-items-center rounded-full transition ${speakerOn ? 'bg-[#5865f2] text-white' : 'bg-[#36393f] hover:bg-[#4f545c]'}`} aria-label="Громкая связь">{speakerOn ? <Volume2 /> : <VolumeX />}</button>}
         {video && <button type="button" onClick={toggleCamera} className={`grid h-12 w-12 place-items-center rounded-full transition ${cameraOff ? 'bg-[#ed4245] text-white' : 'bg-[#36393f] hover:bg-[#4f545c]'}`} aria-label="Камера">{cameraOff ? <VideoOff /> : <Video />}</button>}
         <button type="button" onClick={toggleSharing} className={`grid h-12 w-12 place-items-center rounded-full transition ${sharing ? 'bg-[#5865f2] text-white' : 'bg-[#36393f] hover:bg-[#4f545c]'}`} aria-label="Демонстрация экрана">{sharing ? <ScreenShareOff /> : <ScreenShare />}</button>
         <button type="button" onClick={end} className="grid h-12 w-14 place-items-center rounded-2xl bg-[#ed4245] text-white transition hover:bg-[#c03537]" aria-label="Завершить звонок"><PhoneOff /></button>
