@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MessageSquare, Newspaper, Settings, ShieldCheck } from 'lucide-react';
+import { Bell, MessageSquare, Newspaper, Settings, ShieldCheck } from 'lucide-react';
 
 import api from '../api/axios';
 import Avatar from '../components/Avatar';
@@ -26,6 +26,10 @@ export default function Messenger() {
 
   const [dialog, setDialog] = useState(null);
   const readSent = useRef(new Map());
+  const previousUnread = useRef(0);
+  const [notificationPermission, setNotificationPermission] = useState(() =>
+    typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
+  );
 
   const active = useMemo(
     () => conversations.find((item) => item.id === conversationId) || null,
@@ -65,6 +69,32 @@ export default function Messenger() {
 
   const total = conversations.reduce((sum, item) => sum + item.unread, 0);
 
+  const requestNotifications = async () => {
+    if (typeof Notification === 'undefined') return;
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+  };
+
+  useEffect(() => {
+    const wasUnread = previousUnread.current;
+    previousUnread.current = total;
+
+    if (
+      notificationPermission !== 'granted' ||
+      total <= wasUnread ||
+      document.visibilityState === 'visible' ||
+      typeof Notification === 'undefined'
+    ) {
+      return;
+    }
+
+    const count = total - wasUnread;
+    new Notification('Сообщения секунды', {
+      body: count === 1 ? 'Новое непрочитанное сообщение' : `Новых сообщений: ${count}`,
+      tag: 'messages-seconds-unread',
+    });
+  }, [notificationPermission, total]);
+
   // Число непрочитанных видно во вкладке: мессенджер редко держат на переднем плане.
   useEffect(() => {
     document.title = total ? `(${total}) СООБЩЕНИЯ СЕКУНДЫ` : 'СООБЩЕНИЯ СЕКУНДЫ';
@@ -103,6 +133,18 @@ export default function Messenger() {
             </button>
           </div>
         </header>
+
+        {notificationPermission === 'default' && (
+          <div className="mx-3 mb-2 rounded-xl border border-brand/20 bg-brand-accent px-3 py-2.5 text-sm text-ink">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+              <span className="min-w-0 flex-1">Включите уведомления о новых сообщениях</span>
+              <button type="button" onClick={requestNotifications} className="btn-primary px-3 py-1.5 text-xs">
+                Включить
+              </button>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="px-3 pb-2">
