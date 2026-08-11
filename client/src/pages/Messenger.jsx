@@ -31,6 +31,7 @@ export default function Messenger() {
   const [callError, setCallError] = useState('');
   const readSent = useRef(new Map());
   const previousUnread = useRef(0);
+  const notifiedCalls = useRef(new Set());
   const [notificationPermission, setNotificationPermission] = useState(() =>
     typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
   );
@@ -79,7 +80,25 @@ export default function Messenger() {
     const checkIncoming = async () => {
       try {
         const { data } = await api.get('/calls/incoming');
-        if (!cancelled && data.calls?.[0]) setIncomingCall(data.calls[0]);
+        if (!cancelled && data.calls?.[0]) {
+          const incoming = data.calls[0];
+          setIncomingCall(incoming);
+
+          if (
+            typeof Notification !== 'undefined' &&
+            Notification.permission === 'granted' &&
+            !notifiedCalls.current.has(incoming.id)
+          ) {
+            notifiedCalls.current.add(incoming.id);
+            const conversation = conversations.find((item) => item.id === incoming.conversation_id);
+            const notification = new Notification('Входящий звонок · Сообщения секунды', {
+              body: `${conversation?.title || 'Собеседник'} звонит вам`,
+              tag: `messages-seconds-call-${incoming.id}`,
+              requireInteraction: true,
+            });
+            notification.onclick = () => window.focus();
+          }
+        }
       } catch {
         // Звонок не должен превращать обычный чат в экран ошибки, повторим на следующем опросе.
       }
@@ -90,7 +109,7 @@ export default function Messenger() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [activeCall, incomingCall]);
+  }, [activeCall, incomingCall, conversations]);
 
   const startCall = async (conversation, type) => {
     setCallError('');

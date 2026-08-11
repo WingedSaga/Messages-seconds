@@ -23,7 +23,6 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
   const [status, setStatus] = useState(call.role === 'caller' ? 'Вызываем…' : 'Соединяем…');
 
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
-
   useEffect(() => {
     if (call.role !== 'caller' || status !== 'Вызываем…') return undefined;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -42,38 +41,6 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
     context.resume().then(beep).catch(() => {});
     const timer = window.setInterval(() => context.resume().then(beep).catch(() => {}), 1800);
     return () => { window.clearInterval(timer); context.close().catch(() => {}); };
-  }, [call.role, status]);
-
-  // Короткий знакомый гудок слышит только инициатор до установления соединения.
-  // Он создаётся Web Audio API, поэтому не нужен тяжёлый mp3-файл и нет проблем с лицензией.
-  useEffect(() => {
-    if (call.role !== 'caller' || status !== 'Вызываем…') return undefined;
-
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return undefined;
-    const context = new AudioContextClass();
-
-    const beep = () => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.frequency.value = 440;
-      gain.gain.setValueAtTime(0.0001, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.09, context.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.35);
-      oscillator.connect(gain).connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.36);
-    };
-
-    context.resume().then(beep).catch(() => {});
-    const timer = window.setInterval(() => {
-      context.resume().then(beep).catch(() => {});
-    }, 1800);
-
-    return () => {
-      window.clearInterval(timer);
-      context.close().catch(() => {});
-    };
   }, [call.role, status]);
 
   useEffect(() => {
