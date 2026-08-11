@@ -2,9 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react';
 import api from '../api/axios';
 
-const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  ...(import.meta.env.VITE_TURN_URL
+    ? [{ urls: import.meta.env.VITE_TURN_URL, username: import.meta.env.VITE_TURN_USERNAME, credential: import.meta.env.VITE_TURN_CREDENTIAL }]
+    : []),
+];
 
-export default function CallOverlay({ call, peerName, onEnded }) {
+export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
   const localVideo = useRef(null);
   const remoteVideo = useRef(null);
   const peer = useRef(null);
@@ -97,7 +102,7 @@ export default function CallOverlay({ call, peerName, onEnded }) {
           if (remoteVideo.current && streams[0]) remoteVideo.current.srcObject = streams[0];
         };
         connection.onconnectionstatechange = () => {
-          if (connection.connectionState === 'connected') setStatus('Звонок защищён WebRTC');
+          if (connection.connectionState === 'connected') setStatus('Соединение защищено');
           if (connection.connectionState === 'failed') setError('Не удалось установить соединение');
         };
 
@@ -153,7 +158,11 @@ export default function CallOverlay({ call, peerName, onEnded }) {
         <div className="relative grid min-h-[20rem] place-items-center bg-ink p-5 text-center text-white">
           {video && <video ref={remoteVideo} autoPlay playsInline className="absolute inset-0 h-full w-full object-cover" />}
           {video && <video ref={localVideo} autoPlay muted playsInline className="absolute bottom-4 right-4 h-28 w-20 rounded-xl border-2 border-white/70 bg-black object-cover" />}
-          {!video && <div className="grid h-20 w-20 place-items-center rounded-full bg-brand text-2xl font-bold">{peerName?.[0] || '?'}</div>}
+          {peerAvatar ? (
+            <img src={peerAvatar} alt="" className="relative h-20 w-20 rounded-full border-2 border-white/70 object-cover" />
+          ) : (
+            <div className="relative grid h-20 w-20 place-items-center rounded-full bg-brand text-2xl font-bold">{peerName?.[0] || '?'}</div>
+          )}
           <div className={`relative ${video ? 'mt-56 rounded-xl bg-black/45 px-4 py-2 backdrop-blur-sm' : 'mt-4'}`}>
             <p className="font-semibold">{peerName}</p>
             <p className="mt-1 text-sm text-white/75">{error || status}</p>

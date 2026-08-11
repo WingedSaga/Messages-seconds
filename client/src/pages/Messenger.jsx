@@ -28,6 +28,7 @@ export default function Messenger() {
   const [dialog, setDialog] = useState(null);
   const [incomingCall, setIncomingCall] = useState(null);
   const [activeCall, setActiveCall] = useState(null);
+  const [callError, setCallError] = useState('');
   const readSent = useRef(new Map());
   const previousUnread = useRef(0);
   const [notificationPermission, setNotificationPermission] = useState(() =>
@@ -92,15 +93,24 @@ export default function Messenger() {
   }, [activeCall, incomingCall]);
 
   const startCall = async (conversation, type) => {
-    const { data } = await api.post('/calls', { conversation_id: conversation.id, type });
-    setActiveCall({ ...data.call, role: 'caller', peerName: conversation.title });
+    setCallError('');
+    try {
+      // Запрос возможен только по нажатию пользователя — это правило браузеров.
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        setNotificationPermission(await Notification.requestPermission());
+      }
+      const { data } = await api.post('/calls', { conversation_id: conversation.id, type });
+      setActiveCall({ ...data.call, role: 'caller', peerName: conversation.title, peerAvatar: conversation.avatar_url });
+    } catch (err) {
+      setCallError(err.message || 'Не удалось начать звонок');
+    }
   };
 
   const acceptCall = async () => {
     const { data } = await api.post(`/calls/${incomingCall.id}/accept`);
     const conversation = conversations.find((item) => item.id === data.call.conversation_id);
     setIncomingCall(null);
-    setActiveCall({ ...data.call, role: 'callee', peerName: conversation?.title || 'Собеседник' });
+    setActiveCall({ ...data.call, role: 'callee', peerName: conversation?.title || 'Собеседник', peerAvatar: conversation?.avatar_url || null });
   };
 
   const rejectCall = async () => {
@@ -278,7 +288,13 @@ export default function Messenger() {
         </div>
       )}
 
-      {activeCall && <CallOverlay call={activeCall} peerName={activeCall.peerName} onEnded={() => setActiveCall(null)} />}
+      {callError && (
+        <div className="fixed inset-x-4 top-4 z-50 mx-auto max-w-md">
+          <ErrorNotice message={callError} />
+        </div>
+      )}
+
+      {activeCall && <CallOverlay call={activeCall} peerName={activeCall.peerName} peerAvatar={activeCall.peerAvatar} onEnded={() => setActiveCall(null)} />}
     </div>
   );
 }

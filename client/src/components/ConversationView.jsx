@@ -186,10 +186,10 @@ export default function ConversationView({ conversation, meId, onBack, onOpenInf
         </button>
         {conversation.kind === 'direct' && (
           <>
-            <button type="button" onClick={() => onStartCall(conversation, 'audio').catch(() => {})} className="icon-btn" aria-label="Аудиозвонок" title="Аудиозвонок">
+            <button type="button" onClick={() => onStartCall(conversation, 'audio')} className="icon-btn" aria-label="Аудиозвонок" title="Аудиозвонок">
               <Phone className="h-5 w-5" aria-hidden="true" />
             </button>
-            <button type="button" onClick={() => onStartCall(conversation, 'video').catch(() => {})} className="icon-btn" aria-label="Видеозвонок" title="Видеозвонок">
+            <button type="button" onClick={() => onStartCall(conversation, 'video')} className="icon-btn" aria-label="Видеозвонок" title="Видеозвонок">
               <Video className="h-5 w-5" aria-hidden="true" />
             </button>
           </>
