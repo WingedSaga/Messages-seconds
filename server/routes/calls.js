@@ -16,7 +16,7 @@ router.post('/:id/end', controller.finishCall('ended'));
 router.get('/:id/signals', [query('after').optional().isInt({ min: 0 })], validate, controller.getSignals);
 router.post(
   '/:id/signals',
-  [body('kind').isIn(['offer', 'answer', 'candidate']), body('payload').isObject()],
+  [body('kind').isIn(['offer', 'answer', 'candidate', 'renegotiate-offer', 'renegotiate-answer']), body('payload').isObject()],
   validate,
   controller.addSignal
 );
