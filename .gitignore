@@ -4,3 +4,10 @@ dist/
 .env.local
 *.log
 .DS_Store
+
+# Android Studio and Gradle build outputs
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+android/app/build/
