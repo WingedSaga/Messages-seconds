@@ -42,7 +42,7 @@ jobs:
           # и на боевой сборке работать не будет — переменную надо задать.
           # Временный публичный HTTPS-адрес Raspberry Pi. Переменная GitHub
           # VITE_API_URL по-прежнему может переопределить его без изменения кода.
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://precisely-confident-imaging-department.trycloudflare.com/api' }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://pad-holly-coordinated-flows.trycloudflare.com/api' }}
           # Надёжный HTTPS-адрес GitHub Pages. Собственный DuckDNS-домен пока
           # не используется: сертификат для него не выпускается стабильно.
           VITE_BASE_PATH: /Messages-seconds/
