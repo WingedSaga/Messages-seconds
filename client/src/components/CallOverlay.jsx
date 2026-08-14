@@ -10,6 +10,7 @@ const ICE_SERVERS = [
 export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
   const localVideo = useRef(null);
   const remoteVideo = useRef(null);
+  const remoteAudio = useRef(null);
   const peer = useRef(null);
   const stream = useRef(null);
   const displayStream = useRef(null);
@@ -95,7 +96,20 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
         peer.current = connection;
         media.getTracks().forEach((track) => connection.addTrack(track, media));
         connection.onicecandidate = ({ candidate }) => { if (candidate) sendSignal('candidate', candidate.toJSON()).catch(() => {}); };
-        connection.ontrack = ({ streams }) => { if (remoteVideo.current && streams[0]) remoteVideo.current.srcObject = streams[0]; };
+        connection.ontrack = ({ streams, track }) => {
+          const remoteStream = streams[0] || new MediaStream([track]);
+
+          // Для аудиозвонка отдельный audio-элемент надёжнее скрытого video:
+          // часть мобильных браузеров не начинает выводить его звук автоматически.
+          if (remoteAudio.current) {
+            remoteAudio.current.srcObject = remoteStream;
+            remoteAudio.current.play().catch(() => {});
+          }
+          if (remoteVideo.current) {
+            remoteVideo.current.srcObject = remoteStream;
+            remoteVideo.current.play().catch(() => {});
+          }
+        };
         connection.onconnectionstatechange = () => {
           if (connection.connectionState === 'connected') setStatus('Соединение защищено');
           if (connection.connectionState === 'failed') setError('Не удалось установить соединение');
@@ -174,6 +188,7 @@ export default function CallOverlay({ call, peerName, peerAvatar, onEnded }) {
         <div className="hidden items-center gap-1 text-xs text-[#b9bbbe] sm:flex"><ShieldCheck className="h-4 w-4 text-[#43b581]" /> WebRTC защищён</div>
       </header>
       <main className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#111317] p-3 sm:p-5">
+        <audio ref={remoteAudio} autoPlay playsInline />
         <video ref={remoteVideo} autoPlay playsInline className={`h-full w-full rounded-xl bg-[#0b0c0e] object-contain ${video || sharing ? 'block' : 'hidden'}`} />
         {!video && !sharing && <div className="flex flex-col items-center gap-4 text-center"><img src={peerAvatar || ''} alt="" className="h-28 w-28 rounded-full bg-[#5865f2] object-cover" onError={(event) => { event.currentTarget.style.display = 'none'; }} /><p className="text-2xl font-semibold">{peerName || 'Собеседник'}</p><p className="text-sm text-[#b9bbbe]">Аудиозвонок</p></div>}
         <div className="absolute bottom-6 right-6 overflow-hidden rounded-lg border-2 border-[#202225] bg-black shadow-xl"><video ref={localVideo} autoPlay muted playsInline className="h-24 w-32 object-cover sm:h-32 sm:w-44" /><span className="absolute bottom-1 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px]">{sharing ? 'Вы показываете экран' : 'Вы'}</span></div>
