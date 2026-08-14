@@ -50,6 +50,9 @@ app.use(
   })
 );
 
+const { apiLimiter } = require('./middleware/rateLimiters');
+app.use('/api', apiLimiter);
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'soobshcheniya-sekundy-api' });
 });

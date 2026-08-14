@@ -13,6 +13,17 @@ function createLimiter({ windowMs, max, message }) {
   });
 }
 
+// Общий ограничитель гасит всплески запросов до того, как они создадут
+// нагрузку на базу. Более строгие лимиты ниже защищают дорогие операции.
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 240,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS' || req.path === '/health',
+  message: { message: 'Слишком много запросов. Попробуйте через минуту.' },
+});
+
 const authLimiter = createLimiter({
   windowMs: 15 * 60 * 1000,
   max: 30,
@@ -39,4 +50,4 @@ const uploadLimiter = createLimiter({
   message: 'Слишком много вложений. Попробуйте позже.',
 });
 
-module.exports = { authLimiter, registrationLimiter, messageLimiter, uploadLimiter };
+module.exports = { apiLimiter, authLimiter, registrationLimiter, messageLimiter, uploadLimiter };
