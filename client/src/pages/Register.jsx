@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MailCheck } from 'lucide-react';
 import BrandMark from '../components/BrandMark';
 import { ErrorNotice } from '../components/Notice';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ export default function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState(null);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -17,12 +18,35 @@ export default function Register() {
     setError('');
 
     try {
-      await register(form);
+      const result = await register(form);
+      if (result.requiresVerification) {
+        setPending(result);
+        setBusy(false);
+      }
     } catch (err) {
       setError(err.message);
       setBusy(false);
     }
   };
+
+  if (pending) {
+    return (
+      <main className="grid min-h-full place-items-center bg-paper px-4 py-10">
+        <div className="w-full max-w-sm">
+          <div className="card space-y-4 p-6 text-center">
+            <MailCheck className="mx-auto h-10 w-10 text-brand" aria-hidden="true" />
+            <h1 className="font-serif text-xl font-bold text-ink">Подтвердите почту</h1>
+            <p className="text-sm text-muted">{pending.message}</p>
+            <p className="text-sm font-semibold text-ink">{pending.email}</p>
+            <p className="text-sm text-muted">Проверьте «Спам» и «Промоакции». Ссылка действует 24 часа.</p>
+            <Link to={`/verify-email?email=${encodeURIComponent(pending.email)}`} className="btn-primary w-full">
+              Ввести код подтверждения
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="grid min-h-full place-items-center bg-paper px-4 py-10">

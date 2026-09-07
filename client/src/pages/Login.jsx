@@ -11,17 +11,22 @@ export default function Login() {
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [verificationEmail, setVerificationEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
     setError('');
+    setVerificationEmail('');
 
     try {
       await login(form);
     } catch (err) {
       setError(err.message);
+      if (err?.response?.data?.code === 'EMAIL_NOT_VERIFIED') {
+        setVerificationEmail(form.email.trim());
+      }
       setBusy(false);
     }
   };
@@ -37,6 +42,17 @@ export default function Login() {
           <h1 className="font-serif text-xl font-bold text-ink">Вход</h1>
 
           <ErrorNotice message={error} />
+
+          {verificationEmail && (
+            <p className="text-sm text-muted">
+              <Link
+                to={`/verify-email?email=${encodeURIComponent(verificationEmail)}`}
+                className="font-semibold text-brand-dark underline"
+              >
+                Подтвердить почту или отправить письмо ещё раз
+              </Link>
+            </p>
+          )}
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium">Почта</span>

@@ -60,15 +60,29 @@ export function AuthProvider({ children }) {
   const register = useCallback(
     async (payload) => {
       const { data } = await api.post('/auth/register', payload);
+      if (data.token && data.user) applySession(data.token, data.user);
+      return data;
+    },
+    [applySession]
+  );
+
+  const verifyEmail = useCallback(
+    async (token) => {
+      const { data } = await api.post('/auth/verify-email', { token });
       applySession(data.token, data.user);
       return data.user;
     },
     [applySession]
   );
 
+  const resendVerification = useCallback(async (email) => {
+    const { data } = await api.post('/auth/resend-verification', { email });
+    return data;
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, setUser }),
-    [user, loading, login, register, logout]
+    () => ({ user, loading, login, register, verifyEmail, resendVerification, logout, setUser }),
+    [user, loading, login, register, verifyEmail, resendVerification, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

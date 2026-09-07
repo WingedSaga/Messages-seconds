@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import Loader from './components/Loader';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import Messenger from './pages/Messenger';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
@@ -52,6 +53,7 @@ export default function App() {
           </GuestOnly>
         }
       />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       <Route
         path="/"

@@ -40,9 +40,9 @@ jobs:
           # Адрес API мессенджера. Задаётся в Settings -> Secrets and variables
           # -> Actions -> Variables. Запасное значение ведёт на локальный сервер
           # и на боевой сборке работать не будет — переменную надо задать.
-          # Временный публичный HTTPS-адрес Raspberry Pi. Переменная GitHub
+          # Постоянный HTTPS-адрес API на бесплатной Oracle VM. Переменная GitHub
           # VITE_API_URL по-прежнему может переопределить его без изменения кода.
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://seasonal-build-delivery-choices.trycloudflare.com/api' }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://messages-seconds.duckdns.org/api' }}
           # Надёжный HTTPS-адрес GitHub Pages. Собственный DuckDNS-домен пока
           # не используется: сертификат для него не выпускается стабильно.
           VITE_BASE_PATH: /Messages-seconds/
